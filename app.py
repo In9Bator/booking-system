@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
-import os, random, string
+import os, json
 from datetime import datetime as _dt, timedelta as _td
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from pywebpush import webpush, WebPushException
 
 app = Flask(__name__)
 
@@ -16,6 +17,11 @@ def _generate_slots():
 
 SLOTS = _generate_slots()
 MAX_CAP = 2
+
+# ---- VAPID設定（環境変数から取得） ----
+VAPID_PRIVATE_KEY = os.environ.get("VAPID_PRIVATE_KEY", "")
+VAPID_PUBLIC_KEY  = os.environ.get("VAPID_PUBLIC_KEY", "")
+VAPID_CLAIMS      = {"sub": "mailto:" + os.environ.get("VAPID_EMAIL", "admin@example.com")}
 
 # ---- DB接続 ----
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -35,6 +41,14 @@ def init_db():
             called    BOOLEAN NOT NULL DEFAULT FALSE,
             ready     BOOLEAN NOT NULL DEFAULT FALSE,
             completed BOOLEAN NOT NULL DEFAULT FALSE
+        )
+    """)
+    # プッシュ通知購読情報テーブル
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS push_subscriptions (
+            id             SERIAL PRIMARY KEY,
+            reservation_id INTEGER NOT NULL,
+            subscription   TEXT NOT NULL
         )
     """)
     conn.commit()
@@ -73,6 +87,28 @@ def get_slot_count(timeslot):
     cur.close()
     conn.close()
     return cnt
+
+def send_push_notification(reservation_id, title, body):
+    """指定した予約IDの購読者にプッシュ通知を送る"""
+    if not VAPID_PRIVATE_KEY or not VAPID_PUBLIC_KEY:
+        return
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT subscription FROM push_subscriptions WHERE reservation_id = %s", (reservation_id,))
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    for row in rows:
+        try:
+            sub = json.loads(row["subscription"])
+            webpush(
+                subscription_info=sub,
+                data=json.dumps({"title": title, "body": body}),
+                vapid_private_key=VAPID_PRIVATE_KEY,
+                vapid_claims=VAPID_CLAIMS,
+            )
+        except WebPushException:
+            pass
 
 # ---- ルーティング ----
 
@@ -119,7 +155,7 @@ def store():
 
 @app.route("/status")
 def status():
-    return render_template("client_status.html")
+    return render_template("client_status.html", vapid_public_key=VAPID_PUBLIC_KEY)
 
 @app.route("/admin_data")
 def admin_data():
@@ -151,6 +187,11 @@ def update():
     conn.commit()
     cur.close()
     conn.close()
+
+    # called が True になった時に通知を送る
+    if field == "called" and bool_value:
+        send_push_notification(id_, "🔔 呼び出されています", "受付カウンターへお越しください")
+
     return jsonify({"status": "ok"})
 
 @app.route("/store_action", methods=["POST"])
@@ -174,6 +215,32 @@ def store_action():
     cur.close()
     conn.close()
     return jsonify({"status": "error"})
+
+# ---- プッシュ通知API ----
+
+@app.route("/vapid_public_key")
+def vapid_public_key():
+    return jsonify({"key": VAPID_PUBLIC_KEY})
+
+@app.route("/subscribe", methods=["POST"])
+def subscribe():
+    data = request.get_json()
+    reservation_id = data.get("reservation_id")
+    subscription   = json.dumps(data.get("subscription"))
+    if not reservation_id or not subscription:
+        return jsonify({"status": "error"}), 400
+    conn = get_db()
+    cur = conn.cursor()
+    # 同じ予約IDの古い購読を削除して新しいものを登録
+    cur.execute("DELETE FROM push_subscriptions WHERE reservation_id = %s", (reservation_id,))
+    cur.execute(
+        "INSERT INTO push_subscriptions (reservation_id, subscription) VALUES (%s, %s)",
+        (reservation_id, subscription)
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+    return jsonify({"status": "ok"})
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
