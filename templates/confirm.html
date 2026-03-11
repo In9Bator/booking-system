@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>予約確認</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green:   #00ff88;
+    --bg:      #0a0e1a;
+    --card-bg: #111827;
+    --border:  #1e2d40;
+    --text:    #e0e6f0;
+    --muted:   #4a6080;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(0,255,136,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(0,120,255,0.06) 0%, transparent 60%);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; letter-spacing: 0.25em; color: var(--green); }
+  .logo-sep { color: var(--border); }
+  .logo-sub { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); }
+
+  .page {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+    animation: fadeUp 0.45s ease both;
+  }
+  .page-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .page-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 36px;
+  }
+
+  /* 確認カード */
+  .confirm-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .confirm-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+  }
+  .confirm-row {
+    display: flex;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .confirm-row:last-child { border-bottom: none; }
+  .confirm-key {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    width: 90px;
+    flex-shrink: 0;
+  }
+  .confirm-val {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--green);
+    text-shadow: 0 0 12px rgba(0,255,136,0.3);
+  }
+
+  /* ボタン群 */
+  .btn-row { display: flex; gap: 12px; align-items: stretch; }
+
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 20px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .btn-back:hover { border-color: var(--text); color: var(--text); }
+
+  .btn-confirm-wrap { flex: 1; display: flex; }
+  .btn-confirm {
+    flex: 1;
+    background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,255,136,0.08));
+    border: 1px solid rgba(0,255,136,0.4);
+    color: var(--green);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-shadow: 0 0 10px rgba(0,255,136,0.3);
+  }
+  .btn-confirm:hover {
+    background: linear-gradient(135deg, rgba(0,255,136,0.25), rgba(0,255,136,0.12));
+    box-shadow: 0 0 24px rgba(0,255,136,0.15);
+  }
+  .btn-confirm:active { transform: scale(0.98); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">RESERVE</span>
+  <span class="logo-sep">|</span>
+  <span class="logo-sub">予約システム</span>
+</header>
+
+<div class="page">
+  <p class="page-label">Booking — Step 2</p>
+  <h1 class="page-heading">予約内容の確認</h1>
+
+  <div class="confirm-card">
+    <div class="confirm-row">
+      <span class="confirm-key">Time</span>
+      <span class="confirm-val">{{ timeslot }}</span>
+    </div>
+    <div class="confirm-row">
+      <span class="confirm-key">Password</span>
+      <span class="confirm-val">{{ password }}</span>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <a href="/" class="btn-back">← 戻る</a>
+    <form action="/reserve" method="post" class="btn-confirm-wrap">
+      <input type="hidden" name="timeslot" value="{{ timeslot }}">
+      <input type="hidden" name="password" value="{{ password }}">
+      <button class="btn-confirm" type="submit">予約を確定する →</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>
