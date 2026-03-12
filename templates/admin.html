@@ -104,10 +104,7 @@ function setCompleted(id, value){
 }
 
 function resetDB(){
-    if(!confirm('全予約データを削除します。
-本当によろしいですか？
-
-この操作は取り消せません。')) return;
+    if(!confirm('全予約データを削除します。\n本当によろしいですか？\n\nこの操作は取り消せません。')) return;
     if(!confirm('最終確認：データベースをリセットしますか？')) return;
     $.post('/reset_db', function(data){
         if(data.status === 'ok'){
