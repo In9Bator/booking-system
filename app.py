@@ -242,5 +242,15 @@ def subscribe():
     conn.close()
     return jsonify({"status": "ok"})
 
+@app.route("/reset_db", methods=["POST"])
+def reset_db():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("TRUNCATE TABLE reservations, push_subscriptions RESTART IDENTITY")
+    conn.commit()
+    cur.close()
+    conn.close()
+    return jsonify({"status": "ok"})
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
