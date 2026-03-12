@@ -3,215 +3,340 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>予約ステータス確認</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<title>受付状況</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+  :root {
+    --green:    #00ff88;
+    --yellow:   #ffd700;
+    --bg:       #0a0e1a;
+    --card-bg:  #111827;
+    --border:   #1e2d40;
+    --text:     #e0e6f0;
+    --muted:    #4a6080;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    background: #0a0e1a;
-    color: #e0e6f0;
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(0,255,136,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(0,120,255,0.06) 0%, transparent 60%);
+    color: var(--text);
     font-family: 'Noto Sans JP', sans-serif;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+  }
+
+  /* ── ヘッダー ── */
+  .board-header {
+    display: flex;
     align-items: center;
-    justify-content: flex-start;
-    padding: 40px 20px;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    flex-shrink: 0;
   }
-
-  h1 { font-size: 1.4rem; letter-spacing: 0.05em; margin-bottom: 8px; }
-  .subtitle { color: #4a6080; font-size: 0.85rem; margin-bottom: 32px; }
-
-  .input-card {
-    background: #111827;
-    border: 1px solid #1e2d40;
-    border-radius: 12px;
-    padding: 24px;
-    width: 100%;
-    max-width: 360px;
-    margin-bottom: 24px;
-  }
-
-  .form-control {
-    background: #0d1525;
-    border: 1px solid #1e2d40;
-    color: #e0e6f0;
-    border-radius: 8px;
-    padding: 12px 16px;
-    width: 100%;
-    font-size: 15px;
-    outline: none;
-    margin-bottom: 12px;
-    display: block;
-  }
-  .form-control:focus { border-color: rgba(0,180,255,0.4); }
-  .form-control::placeholder { color: #2a3a50; }
-
-  .btn-check {
-    width: 100%;
-    padding: 13px;
-    background: linear-gradient(135deg, rgba(0,180,255,0.15), rgba(0,180,255,0.08));
-    border: 1px solid rgba(0,180,255,0.3);
-    color: #00b4ff;
-    border-radius: 8px;
-    font-size: 14px;
+  .board-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
     font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .board-clock {
+    font-family: 'Orbitron', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--muted);
     letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: all 0.2s;
   }
-  .btn-check:hover { background: rgba(0,180,255,0.2); }
 
-  /* ステータスカード */
-  .status-card {
-    background: #111827;
-    border: 1px solid #1e2d40;
-    border-radius: 16px;
-    padding: 32px 24px;
-    width: 100%;
-    max-width: 360px;
-    text-align: center;
-    display: none;
-    position: relative;
+  /* ── 自分の番号バー ── */
+  .my-number-bar {
+    background: rgba(0,255,136,0.05);
+    border-bottom: 1px solid rgba(0,255,136,0.12);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .my-number-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .my-number-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--green);
+    text-shadow: 0 0 12px rgba(0,255,136,0.5);
+  }
+  .my-status-badge {
+    margin-left: auto;
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .my-status-badge.waiting   { color: var(--muted); border-color: var(--border); }
+  .my-status-badge.called    { color: var(--green); border-color: rgba(0,255,136,0.4); background: rgba(0,255,136,0.08); animation: pulse 1.2s ease-in-out infinite; }
+  .my-status-badge.completed { color: #555; border-color: #333; }
+
+  /* ── パネル ── */
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 12px;
+    flex: 1;
+  }
+
+  @media (max-width: 480px) {
+    .panels { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
+    position: relative;
   }
-
-  .status-card::before {
+  .panel::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 3px;
   }
+  .panel-called::before  { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+  .panel-waiting::before { background: linear-gradient(90deg, transparent, var(--yellow), transparent); }
 
-  .status-waiting::before  { background: linear-gradient(90deg, transparent, #4a6080, transparent); }
-  .status-called::before   { background: linear-gradient(90deg, transparent, #00ff88, transparent); }
-  .status-completed::before{ background: linear-gradient(90deg, transparent, #888, transparent); }
+  .panel-header {
+    padding: 14px 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .panel-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .panel-called  .panel-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .panel-waiting .panel-dot { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
 
-  .status-icon { font-size: 3rem; margin-bottom: 12px; }
-  .status-label { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; }
-  .status-number { font-size: 5rem; font-weight: 900; line-height: 1; margin-bottom: 8px; }
+  .panel-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .panel-called  .panel-label { color: var(--green); }
+  .panel-waiting .panel-label { color: var(--yellow); }
 
-  .status-waiting  .status-number { color: #4a8090; }
-  .status-called   .status-number { color: #00ff88; text-shadow: 0 0 30px rgba(0,255,136,0.5); }
-  .status-completed .status-number { color: #555; }
+  .panel-count {
+    margin-left: auto;
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
 
-  .status-text { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
-  .status-sub  { font-size: 0.85rem; color: #4a6080; }
+  .number-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px;
+    align-content: flex-start;
+    overflow-y: auto;
+    flex: 1;
+  }
 
-  .status-waiting   .status-text { color: #8090a0; }
-  .status-called    .status-text { color: #00ff88; }
-  .status-completed .status-text { color: #666; }
+  .num-tile {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    border-radius: 10px;
+    border: 2px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    position: relative;
+  }
 
-  /* 呼出中は点滅 */
+  /* 自分の番号に星マーク */
+  .num-tile.is-mine::after {
+    content: '★';
+    position: absolute;
+    top: -8px; right: -8px;
+    font-size: 11px;
+    color: var(--green);
+    text-shadow: 0 0 6px rgba(0,255,136,0.8);
+  }
+
+  .panel-called .num-tile {
+    font-size: clamp(1.8rem, 7vw, 3.5rem);
+    padding: 10px 16px;
+    color: var(--green);
+    border-color: rgba(0,255,136,0.35);
+    background: rgba(0,255,136,0.07);
+    text-shadow: 0 0 20px rgba(0,255,136,0.5);
+  }
+  .panel-waiting .num-tile {
+    font-size: clamp(1.2rem, 5vw, 2.4rem);
+    padding: 8px 12px;
+    color: var(--yellow);
+    border-color: rgba(255,215,0,0.3);
+    background: rgba(255,215,0,0.05);
+  }
+
+  .panel-called  .num-tile.is-mine { border-color: var(--green); box-shadow: 0 0 16px rgba(0,255,136,0.25); }
+  .panel-waiting .num-tile.is-mine { border-color: var(--yellow); box-shadow: 0 0 16px rgba(255,215,0,0.25); }
+
+  .empty-msg {
+    color: var(--border);
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    padding: 16px 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+  }
   @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    50%       { opacity: 0.5; }
   }
-  .status-called .status-icon { animation: pulse 1.2s ease-in-out infinite; }
 
-  .error-msg { color: #ff4d6d; font-size: 0.9rem; margin-top: 8px; text-align: center; display: none; }
-  .timeslot-badge {
-    display: inline-block;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid #1e2d40;
-    border-radius: 6px;
-    padding: 4px 12px;
-    font-size: 0.85rem;
-    color: #4a6080;
-    margin-top: 12px;
-  }
+  .number-grid::-webkit-scrollbar { width: 3px; }
+  .number-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 </style>
 </head>
 <body>
-  <h1>予約ステータス確認</h1>
-  <p class="subtitle">整理番号とパスワードを入力してください</p>
 
-  <div class="input-card">
-    <input type="number" id="number" class="form-control" placeholder="整理番号">
-    <input type="text"   id="password" class="form-control" placeholder="パスワード">
-    <button class="btn-check" onclick="checkStatus()">確認する</button>
-    <div class="error-msg" id="error-msg">整理番号またはパスワードが正しくありません</div>
+<div class="board-header">
+  <span class="board-title">Reception Board</span>
+  <span class="board-clock" id="clock">--:--:--</span>
+</div>
+
+<!-- 自分の番号バー（URLパラメータ ?number=X がある場合のみ表示） -->
+<div class="my-number-bar" id="my-number-bar" style="display:none;">
+  <span class="my-number-label">Your Number</span>
+  <span class="my-number-value" id="my-number-value"></span>
+  <span class="my-status-badge waiting" id="my-status-badge">待機中</span>
+</div>
+
+<div class="panels">
+  <div class="panel panel-called">
+    <div class="panel-header">
+      <div class="panel-dot"></div>
+      <span class="panel-label">呼び出し中</span>
+      <span class="panel-count" id="called-count">0件</span>
+    </div>
+    <div class="number-grid" id="called-area">
+      <span class="empty-msg">— STAND BY —</span>
+    </div>
   </div>
 
-  <div class="status-card" id="status-card">
-    <div class="status-icon" id="status-icon"></div>
-    <div class="status-label">整理番号</div>
-    <div class="status-number" id="status-number"></div>
-    <div class="status-text" id="status-text"></div>
-    <div class="status-sub"  id="status-sub"></div>
-    <div class="timeslot-badge" id="timeslot-badge"></div>
+  <div class="panel panel-waiting">
+    <div class="panel-header">
+      <div class="panel-dot"></div>
+      <span class="panel-label">待機中</span>
+      <span class="panel-count" id="waiting-count">0件</span>
+    </div>
+    <div class="number-grid" id="waiting-area">
+      <span class="empty-msg">— STAND BY —</span>
+    </div>
   </div>
+</div>
 
 <script>
-let currentNumber = null;
-let currentPassword = null;
-let pollTimer = null;
+// URLパラメータから自分の番号を取得
+const params   = new URLSearchParams(window.location.search);
+const myNumber = params.get("number") ? parseInt(params.get("number")) : null;
 
-function checkStatus(){
-    currentNumber   = $("#number").val();
-    currentPassword = $("#password").val();
-    if(!currentNumber || !currentPassword) return;
-    $("#error-msg").hide();
-    fetchStatus();
+if(myNumber){
+    document.getElementById("my-number-bar").style.display = "flex";
+    document.getElementById("my-number-value").textContent = myNumber;
 }
 
-function fetchStatus(){
+// 時計
+function updateClock(){
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ボード更新
+function loadBoard(){
     $.getJSON("/admin_data", function(data){
-        let found = false;
+        let calledHtml = "", waitingHtml = "";
+        let calledCount = 0, waitingCount = 0;
+        let myStatus = null;
+
         for(const slot in data){
             data[slot].forEach(r => {
-                if(String(r.id) === String(currentNumber) && r.password === currentPassword){
-                    found = true;
-                    renderStatus(r, slot);
+                if(r.completed) return;
+                const isMine = (myNumber && r.id === myNumber);
+                if(isMine) myStatus = r.called ? "called" : "waiting";
+
+                const mineClass = isMine ? " is-mine" : "";
+                if(r.called){
+                    calledHtml += `<div class="num-tile${mineClass}">${r.id}</div>`;
+                    calledCount++;
+                } else {
+                    waitingHtml += `<div class="num-tile${mineClass}">${r.id}</div>`;
+                    waitingCount++;
                 }
             });
         }
-        if(!found){
-            $("#status-card").hide();
-            $("#error-msg").show();
-            clearInterval(pollTimer);
+
+        $("#called-area").html(calledCount > 0 ? calledHtml : '<span class="empty-msg">— STAND BY —</span>');
+        $("#waiting-area").html(waitingCount > 0 ? waitingHtml : '<span class="empty-msg">— STAND BY —</span>');
+        $("#called-count").text(calledCount + "件");
+        $("#waiting-count").text(waitingCount + "件");
+
+        // 自分のステータスバッジ更新
+        if(myNumber){
+            const $badge = $("#my-status-badge");
+            if(myStatus === "called"){
+                $badge.text("呼び出し中！").attr("class", "my-status-badge called");
+            } else if(myStatus === "waiting"){
+                $badge.text("待機中").attr("class", "my-status-badge waiting");
+            } else {
+                $badge.text("受付完了").attr("class", "my-status-badge completed");
+            }
         }
     });
 }
 
-function renderStatus(r, slot){
-    const $card = $("#status-card");
-    $card.removeClass("status-waiting status-called status-completed").show();
-
-    if(r.completed){
-        $card.addClass("status-completed");
-        $("#status-icon").text("✓");
-        $("#status-text").text("受付完了");
-        $("#status-sub").text("ご来店ありがとうございました");
-        clearInterval(pollTimer);
-    } else if(r.called){
-        $card.addClass("status-called");
-        $("#status-icon").text("🔔");
-        $("#status-text").text("呼び出されています！");
-        $("#status-sub").text("受付カウンターへお越しください");
-    } else {
-        $card.addClass("status-waiting");
-        $("#status-icon").text("⏳");
-        $("#status-text").text("お待ちください");
-        $("#status-sub").text("呼び出しまでしばらくお待ちください");
-    }
-
-    $("#status-number").text(r.id);
-    $("#timeslot-badge").text("予約時間: " + slot);
-
-    // ポーリング開始（完了後は停止済み）
-    if(!r.completed){
-        clearInterval(pollTimer);
-        pollTimer = setInterval(fetchStatus, 3000);
-    }
-}
-
-// Enterキー対応
-$(document).on("keydown", function(e){
-    if(e.key === "Enter") checkStatus();
-});
+setInterval(loadBoard, 3000);
+loadBoard();
 </script>
 </body>
 </html>
