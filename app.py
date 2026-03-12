@@ -44,6 +44,18 @@ def init_db():
     """)
     # 既存テーブルへのname列追加（マイグレーション）
     cur.execute("ALTER TABLE reservations ADD COLUMN IF NOT EXISTS name TEXT NOT NULL DEFAULT ''")
+    # passwordカラムが残っている場合は削除
+    cur.execute("""
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name='reservations' AND column_name='password'
+            ) THEN
+                ALTER TABLE reservations DROP COLUMN password;
+            END IF;
+        END$$;
+    """)
     cur.execute("""
         CREATE TABLE IF NOT EXISTS push_subscriptions (
             id             SERIAL PRIMARY KEY,
