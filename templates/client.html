@@ -8,16 +8,13 @@
 <style>
   :root {
     --green:   #00ff88;
-    --blue:    #0078ff;
     --bg:      #0a0e1a;
     --card-bg: #111827;
     --border:  #1e2d40;
     --text:    #e0e6f0;
     --muted:   #4a6080;
   }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     background-color: var(--bg);
     background-image:
@@ -27,8 +24,6 @@
     font-family: 'Noto Sans JP', sans-serif;
     min-height: 100vh;
   }
-
-  /* ── ヘッダー ── */
   header {
     border-bottom: 1px solid var(--border);
     padding: 18px 32px;
@@ -36,50 +31,25 @@
     align-items: center;
     gap: 14px;
   }
-  .logo {
-    font-family: 'Orbitron', monospace;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.25em;
-    color: var(--green);
-  }
+  .logo { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; letter-spacing: 0.25em; color: var(--green); }
   .logo-sep { color: var(--border); }
   .logo-sub { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); }
-
-  /* ── ページ ── */
   .page {
     max-width: 700px;
     margin: 0 auto;
     padding: 48px 24px 80px;
     animation: fadeUp 0.45s ease both;
   }
-
-  .page-label {
-    font-family: 'Orbitron', monospace;
-    font-size: 11px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-  .page-heading {
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-bottom: 36px;
-    line-height: 1.4;
-  }
-
-  /* ── スロットグリッド ── */
+  .page-label { font-family: 'Orbitron', monospace; font-size: 11px; letter-spacing: 0.3em; color: var(--muted); margin-bottom: 10px; }
+  .page-heading { font-size: 1.6rem; font-weight: 700; margin-bottom: 36px; line-height: 1.4; }
   .slots-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 10px;
     margin-bottom: 36px;
   }
-
   .slot-label { display: block; cursor: pointer; }
   .slot-label input[type="radio"] { display: none; }
-
   .slot-box {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -99,86 +69,16 @@
     opacity: 0;
     transition: opacity 0.18s;
   }
-
-  .slot-label:not(.is-full):hover .slot-box {
-    border-color: rgba(0,255,136,0.4);
-    box-shadow: 0 0 16px rgba(0,255,136,0.08);
-    transform: translateY(-2px);
-  }
+  .slot-label:not(.is-full):hover .slot-box { border-color: rgba(0,255,136,0.4); transform: translateY(-2px); }
   .slot-label:not(.is-full):hover .slot-box::before { opacity: 1; }
-
-  .slot-label input[type="radio"]:checked + .slot-box {
-    border-color: var(--green);
-    background: rgba(0,255,136,0.06);
-    box-shadow: 0 0 20px rgba(0,255,136,0.12);
-  }
+  .slot-label input[type="radio"]:checked + .slot-box { border-color: var(--green); background: rgba(0,255,136,0.06); }
   .slot-label input[type="radio"]:checked + .slot-box::before { opacity: 1; }
-
-  .slot-time {
-    font-family: 'Orbitron', monospace;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
+  .slot-time { font-family: 'Orbitron', monospace; font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
   .slot-label input[type="radio"]:checked + .slot-box .slot-time { color: var(--green); }
-
-  .slot-count {
-    font-size: 0.72rem;
-    color: var(--muted);
-    letter-spacing: 0.05em;
-  }
-
-  /* 満員 */
+  .slot-count { font-size: 0.72rem; color: var(--muted); }
   .slot-label.is-full { cursor: not-allowed; }
-  .slot-label.is-full .slot-box {
-    opacity: 0.4;
-    border-color: var(--border);
-  }
-  .full-tag {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.15em;
-    color: #ff4d6d;
-    border: 1px solid rgba(255,77,109,0.3);
-    border-radius: 4px;
-    padding: 2px 6px;
-    margin-top: 4px;
-    display: inline-block;
-  }
-
-  /* ── 入力欄 ── */
-  .field-group { margin-bottom: 28px; }
-  .field-label {
-    display: block;
-    font-family: 'Orbitron', monospace;
-    font-size: 10px;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-  .field-input {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 13px 16px;
-    width: 100%;
-    max-width: 320px;
-    font-size: 15px;
-    font-family: 'Noto Sans JP', sans-serif;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    display: block;
-  }
-  .field-input:focus {
-    border-color: rgba(0,255,136,0.5);
-    box-shadow: 0 0 0 3px rgba(0,255,136,0.08);
-  }
-  .field-input::placeholder { color: #2a3a50; }
-
-  /* ── ボタン ── */
+  .slot-label.is-full .slot-box { opacity: 0.4; }
+  .full-tag { font-family: 'Orbitron', monospace; font-size: 0.6rem; letter-spacing: 0.15em; color: #ff4d6d; border: 1px solid rgba(255,77,109,0.3); border-radius: 4px; padding: 2px 6px; margin-top: 4px; display: inline-block; }
   .btn-primary {
     display: inline-flex;
     align-items: center;
@@ -194,52 +94,23 @@
     letter-spacing: 0.2em;
     cursor: pointer;
     transition: all 0.2s;
-    text-shadow: 0 0 10px rgba(0,255,136,0.3);
   }
-  .btn-primary:hover {
-    background: linear-gradient(135deg, rgba(0,255,136,0.25), rgba(0,255,136,0.12));
-    box-shadow: 0 0 24px rgba(0,255,136,0.15);
-  }
-  .btn-primary:active { transform: scale(0.98); }
-
-  /* ── フッターリンク ── */
-  .footer-link {
-    margin-top: 48px;
-    font-size: 0.82rem;
-    color: var(--muted);
-    text-align: center;
-  }
-  .footer-link a {
-    color: var(--green);
-    text-decoration: none;
-    border-bottom: 1px solid rgba(0,255,136,0.3);
-    transition: border-color 0.2s;
-  }
-  .footer-link a:hover { border-bottom-color: var(--green); }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (max-width: 480px) {
-    .slots-grid { grid-template-columns: repeat(3, 1fr); }
-    .slot-time { font-size: 0.9rem; }
-  }
+  .btn-primary:hover { background: linear-gradient(135deg, rgba(0,255,136,0.25), rgba(0,255,136,0.12)); box-shadow: 0 0 24px rgba(0,255,136,0.15); }
+  .footer-link { margin-top: 48px; font-size: 0.82rem; color: var(--muted); text-align: center; }
+  .footer-link a { color: var(--green); text-decoration: none; border-bottom: 1px solid rgba(0,255,136,0.3); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 480px) { .slots-grid { grid-template-columns: repeat(3, 1fr); } .slot-time { font-size: 0.9rem; } }
 </style>
 </head>
 <body>
-
 <header>
   <span class="logo">RESERVE</span>
   <span class="logo-sep">|</span>
   <span class="logo-sub">予約システム</span>
 </header>
-
 <div class="page">
   <p class="page-label">Booking — Step 1</p>
-  <h1 class="page-heading">時間帯とパスワードを<br>入力してください</h1>
-
+  <h1 class="page-heading">時間帯を選んで<br>ご予約ください</h1>
   <form action="/confirm" method="post">
     <div class="slots-grid">
       {% for slot in slots %}
@@ -262,21 +133,14 @@
         {% endif %}
       {% endfor %}
     </div>
-
     <div class="field-group">
-      <label class="field-label" for="password">Password</label>
-      <input class="field-input" type="text" id="password" name="password" placeholder="パスワードを入力" required>
+      <label class="field-label" for="name">お名前</label>
+      <input class="field-input" type="text" id="name" name="name" placeholder="お名前を入力" required>
     </div>
 
-    <button class="btn-primary" type="submit">
-      確認画面へ <span>→</span>
-    </button>
+    <button class="btn-primary" type="submit">確認画面へ →</button>
   </form>
-
-  <p class="footer-link">
-    すでに予約済みの方は <a href="/status">ステータス確認ページ</a> へ
-  </p>
+  <p class="footer-link">すでに予約済みの方は <a href="/status">ステータス確認ページ</a> へ</p>
 </div>
-
 </body>
 </html>

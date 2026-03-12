@@ -49,7 +49,7 @@ function loadAdmin(){
                 queueHtml += `<p class="slot-header">🕐 ${slot}</p>
                 <table class="table table-bordered align-middle mb-4">
                   <thead class="table-light">
-                    <tr><th>整理番号</th><th>パスワード</th><th>状態</th><th>操作</th></tr>
+                    <tr><th>整理番号</th><th>お名前</th><th>時間</th><th>状態</th><th>操作</th></tr>
                   </thead><tbody>`;
                 active.forEach(r => {
                     const rowClass = r.called ? "row-called" : "row-waiting";
@@ -61,7 +61,8 @@ function loadAdmin(){
                         : `<button class="btn btn-success btn-sm" onclick="setCalled(${r.id}, true)">呼び出す</button>`;
                     queueHtml += `<tr class="${rowClass}">
                       <td><span class="badge-id">${r.id}</span></td>
-                      <td><code>${r.password}</code></td>
+                      <td>${r.name || "—"}</td>
+                      <td>${r.timeslot}</td>
                       <td>${statusBadge}</td>
                       <td>
                         ${callBtn}
@@ -77,12 +78,13 @@ function loadAdmin(){
                 completedHtml += `<p class="slot-header">🕐 ${slot}</p>
                 <table class="table table-bordered align-middle mb-4">
                   <thead class="table-light">
-                    <tr><th>整理番号</th><th>パスワード</th><th>操作</th></tr>
+                    <tr><th>整理番号</th><th>お名前</th><th>時間</th><th>操作</th></tr>
                   </thead><tbody>`;
                 done.forEach(r => {
                     completedHtml += `<tr class="row-completed">
                       <td><span class="badge-id">${r.id}</span></td>
-                      <td><code>${r.password}</code></td>
+                      <td>${r.name || "—"}</td>
+                      <td>${r.timeslot}</td>
                       <td><button class="btn btn-outline-warning btn-sm" onclick="setCompleted(${r.id}, false)">取り消してキューに戻す</button></td>
                     </tr>`;
                 });
