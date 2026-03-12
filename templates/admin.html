@@ -17,7 +17,10 @@
 </head>
 <body>
 <div class="container py-4">
-  <h2 class="mb-4 fw-bold">🎛 管理画面</h2>
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="fw-bold mb-0">🎛 管理画面</h2>
+    <button class="btn btn-outline-danger btn-sm" onclick="resetDB()">🗑 データベースをリセット</button>
+  </div>
 
   <div class="section-card">
     <h5 class="mb-3">📋 現在のキュー</h5>
@@ -98,6 +101,22 @@ function setCalled(id, value){
 
 function setCompleted(id, value){
     $.post("/update", {id: id, field: "completed", value: value ? "1" : "0"}, function(){ loadAdmin(); });
+}
+
+function resetDB(){
+    if(!confirm('全予約データを削除します。
+本当によろしいですか？
+
+この操作は取り消せません。')) return;
+    if(!confirm('最終確認：データベースをリセットしますか？')) return;
+    $.post('/reset_db', function(data){
+        if(data.status === 'ok'){
+            alert('リセット完了しました。');
+            loadAdmin();
+        } else {
+            alert('エラーが発生しました。');
+        }
+    });
 }
 
 setInterval(loadAdmin, 3000);
